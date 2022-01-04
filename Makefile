@@ -7,6 +7,7 @@ release: build
 	docker push vanhtuan/dnsstat:armv7
 	docker push vanhtuan/dnsstat:arm64
 	docker push vanhtuan/dnsstat:amd64
+	docker manifest rm vanhtuan/dnsstat
 	docker manifest create vanhtuan/dnsstat \
 		vanhtuan/dnsstat:amd64 \
 		vanhtuan/dnsstat:armv7 \
