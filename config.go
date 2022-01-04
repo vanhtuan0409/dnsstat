@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"runtime"
 	"strings"
 
@@ -17,12 +18,15 @@ type config struct {
 	Port     int
 	Worker   int
 	Bufsize  int
+	Topk     int
+	HttpPort int
 
 	IgnoreRootDomainsRaw string
 	IgnoreRootDomains    []string
 
-	Listener net.Listener
-	Input    dnstap.Input
+	Listener   net.Listener
+	Input      dnstap.Input
+	HttpServer *http.Server
 }
 
 func parseConfig() *config {
@@ -32,6 +36,8 @@ func parseConfig() *config {
 	flag.IntVar(&ret.Worker, "worker", 0, "Number of worker")
 	flag.IntVar(&ret.Bufsize, "buf", 100, "Channel buffer for receiving dnstap data")
 	flag.StringVar(&ret.IgnoreRootDomainsRaw, "ignore-root", "", "Ignore root domain query (comma sep)")
+	flag.IntVar(&ret.Topk, "topk", 10, "Number of top frequent domain to keep track")
+	flag.IntVar(&ret.HttpPort, "http", 6385, "Port to bind http")
 	flag.Parse()
 
 	if err := ret.Validate(); err != nil {
@@ -76,6 +82,12 @@ func (c *config) Validate() (err error) {
 
 	if c.IgnoreRootDomainsRaw != "" {
 		c.IgnoreRootDomains = strings.Split(c.IgnoreRootDomainsRaw, ",")
+	}
+
+	if c.HttpPort != 0 {
+		c.HttpServer = &http.Server{
+			Addr: fmt.Sprintf(":%d", c.HttpPort),
+		}
 	}
 
 	return

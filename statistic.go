@@ -1,11 +1,13 @@
 package main
 
 import (
-	"log"
 	"sync"
+
+	"github.com/vanhtuan0409/dnsstat/internal/topk"
 )
 
 type statistic struct {
+	stream *topk.Stream
 	sync.RWMutex
 }
 
@@ -14,13 +16,16 @@ type query struct {
 	typ    string
 }
 
-func newStatistic() *statistic {
+func newStatistic(conf *config) *statistic {
 	ret := new(statistic)
+	ret.stream = topk.New(conf.Topk)
 	return ret
 }
 
 func (s *statistic) observe(q *query) {
-	log.Printf("domain: %s - type: %s", q.domain, q.typ)
+	s.Lock()
+	defer s.Unlock()
+	s.stream.Insert(q.domain, 1)
 }
 
 func (s *statistic) reset() error {
