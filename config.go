@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"runtime"
@@ -21,8 +22,9 @@ type config struct {
 	Topk     int
 	HttpPort int
 
-	IgnoreRootDomainsRaw string
-	IgnoreRootDomains    []string
+	IgnoreDomainValues string
+	IgnoreDomainFile   string
+	IgnoreDomains      []string
 
 	Listener   net.Listener
 	Input      dnstap.Input
@@ -36,7 +38,8 @@ func parseConfig() *config {
 	flag.IntVar(&ret.Port, "port", 0, "TCP port to receive dnstap data")
 	flag.IntVar(&ret.Worker, "worker", 0, "Number of worker")
 	flag.IntVar(&ret.Bufsize, "buf", 100, "Channel buffer for receiving dnstap data")
-	flag.StringVar(&ret.IgnoreRootDomainsRaw, "ignore-root", "", "Ignore root domain query (comma sep)")
+	flag.StringVar(&ret.IgnoreDomainValues, "ignore-domains", "", "Ignore root domain query (comma sep)")
+	flag.StringVar(&ret.IgnoreDomainFile, "ignore-file", "", "Ignore root domain query file")
 	flag.IntVar(&ret.Topk, "topk", 10, "Number of top frequent domain to keep track")
 	flag.IntVar(&ret.HttpPort, "http", 6385, "Port to bind http")
 	flag.Parse()
@@ -81,8 +84,25 @@ func (c *config) Validate() (err error) {
 		c.Worker = runtime.NumCPU()
 	}
 
-	if c.IgnoreRootDomainsRaw != "" {
-		c.IgnoreRootDomains = strings.Split(c.IgnoreRootDomainsRaw, ",")
+	if c.IgnoreDomainValues != "" {
+		domains := strings.Split(c.IgnoreDomainValues, ",")
+		for _, val := range domains {
+			if d := strings.TrimSpace(val); d != "" {
+				c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
+			}
+		}
+	}
+
+	if c.IgnoreDomainFile != "" {
+		content, err := ioutil.ReadFile(c.IgnoreDomainFile)
+		if err == nil {
+			domains := strings.Split(string(content), ",")
+			for _, val := range domains {
+				if d := strings.TrimSpace(val); d != "" {
+					c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
+				}
+			}
+		}
 	}
 
 	if c.HttpPort != 0 {

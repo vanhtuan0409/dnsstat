@@ -20,7 +20,7 @@ func worker(ch <-chan []byte, stat *statistic, conf *config) {
 
 		for _, q := range queries {
 			isBlacklist := false
-			for _, root := range conf.IgnoreRootDomains {
+			for _, root := range conf.IgnoreDomains {
 				if strings.HasSuffix(q.domain, fmt.Sprintf("%s.", root)) {
 					isBlacklist = true
 					break
