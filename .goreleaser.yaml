@@ -1,0 +1,49 @@
+before:
+  hooks:
+    - go mod tidy
+dist: bin
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - 7
+dockers:
+  - image_templates:
+      - docker.io/vanhtuan/dnsstat:amd64
+    use: buildx
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+  - image_templates:
+      - docker.io/vanhtuan/dnsstat:armv7
+    use: buildx
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: arm
+    goarm: 7
+    build_flag_templates:
+      - "--platform=linux/arm/v7"
+  - image_templates:
+      - docker.io/vanhtuan/dnsstat:arm64
+    use: buildx
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64"
+docker_manifests:
+  - name_template: docker.io/vanhtuan/dnsstat
+    image_templates:
+      - docker.io/vanhtuan/dnsstat:amd64
+      - docker.io/vanhtuan/dnsstat:armv7
+      - docker.io/vanhtuan/dnsstat:arm64

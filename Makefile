@@ -1,2 +1,4 @@
+.PHONY: build
+
 build:
-	echo "build"
+	goreleaser build --snapshot --rm-dist

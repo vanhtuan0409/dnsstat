@@ -32,6 +32,7 @@ type config struct {
 func parseConfig() *config {
 	ret := new(config)
 	flag.StringVar(&ret.DataFile, "data", "", "Path to dnstap data file (used for testing purpose)")
+	flag.StringVar(&ret.SockFile, "sock", "", "Path to dnstap sock file")
 	flag.IntVar(&ret.Port, "port", 0, "TCP port to receive dnstap data")
 	flag.IntVar(&ret.Worker, "worker", 0, "Number of worker")
 	flag.IntVar(&ret.Bufsize, "buf", 100, "Channel buffer for receiving dnstap data")

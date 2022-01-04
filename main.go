@@ -45,4 +45,7 @@ func main() {
 		defer cancel()
 		conf.HttpServer.Shutdown(gracefulCtx)
 	}
+	if conf.SockFile != "" {
+		os.Remove(conf.SockFile)
+	}
 }
