@@ -96,7 +96,7 @@ func (c *config) Validate() (err error) {
 	if c.IgnoreDomainFile != "" {
 		content, err := ioutil.ReadFile(c.IgnoreDomainFile)
 		if err == nil {
-			domains := strings.Split(string(content), ",")
+			domains := strings.Split(string(content), "\n")
 			for _, val := range domains {
 				if d := strings.TrimSpace(val); d != "" {
 					c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
