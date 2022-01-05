@@ -19,19 +19,23 @@ func worker(ch <-chan []byte, stat *statistic, conf *config) {
 		}
 
 		for _, q := range queries {
-			isBlacklist := false
-			for _, root := range conf.IgnoreDomains {
-				if strings.HasSuffix(q.domain, fmt.Sprintf("%s.", root)) {
-					isBlacklist = true
-					break
-				}
-			}
-
-			if !isBlacklist {
+			if !isDomainBlackListed(q.domain, conf.IgnoreDomains) {
 				stat.observe(q)
 			}
 		}
 	}
+}
+
+func isDomainBlackListed(query string, blacklists []string) bool {
+	ret := false
+	for _, root := range blacklists {
+		fqdn := fmt.Sprintf("%s.", root)
+		if strings.HasSuffix(query, fqdn) {
+			ret = true
+			break
+		}
+	}
+	return ret
 }
 
 func parseQueries(frame []byte) ([]*query, error) {

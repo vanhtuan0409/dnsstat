@@ -43,6 +43,7 @@ dockers:
       - "--platform=linux/arm64"
 docker_manifests:
   - name_template: docker.io/vanhtuan/dnsstat
+    skip_push: false
     image_templates:
       - docker.io/vanhtuan/dnsstat:amd64
       - docker.io/vanhtuan/dnsstat:armv7

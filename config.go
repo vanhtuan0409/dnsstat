@@ -84,24 +84,20 @@ func (c *config) Validate() (err error) {
 		c.Worker = runtime.NumCPU()
 	}
 
+	patterns := []string{}
 	if c.IgnoreDomainValues != "" {
-		domains := strings.Split(c.IgnoreDomainValues, ",")
-		for _, val := range domains {
-			if d := strings.TrimSpace(val); d != "" {
-				c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
-			}
-		}
+		patterns = append(patterns, strings.Split(c.IgnoreDomainValues, ",")...)
 	}
-
 	if c.IgnoreDomainFile != "" {
 		content, err := ioutil.ReadFile(c.IgnoreDomainFile)
 		if err == nil {
-			domains := strings.Split(string(content), "\n")
-			for _, val := range domains {
-				if d := strings.TrimSpace(val); d != "" {
-					c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
-				}
-			}
+			patterns = append(patterns, strings.Split(string(content), "\n")...)
+		}
+	}
+
+	for _, val := range patterns {
+		if d := strings.TrimSpace(val); d != "" {
+			c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
 		}
 	}
 
