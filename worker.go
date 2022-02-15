@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"strings"
 
 	dnstap "github.com/dnstap/golang-dnstap"
 	"github.com/miekg/dns"
@@ -26,11 +24,10 @@ func worker(ch <-chan []byte, stat *statistic, conf *config) {
 	}
 }
 
-func isDomainBlackListed(query string, blacklists []string) bool {
+func isDomainBlackListed(query string, blacklists []DomainMatcher) bool {
 	ret := false
-	for _, root := range blacklists {
-		fqdn := fmt.Sprintf("%s.", root)
-		if strings.HasSuffix(query, fqdn) {
+	for _, m := range blacklists {
+		if m.IsMatch(query) {
 			ret = true
 			break
 		}

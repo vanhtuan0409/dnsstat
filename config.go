@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"runtime"
@@ -24,7 +25,7 @@ type config struct {
 
 	IgnoreDomainValues string
 	IgnoreDomainFile   string
-	IgnoreDomains      []string
+	IgnoreDomains      []DomainMatcher
 
 	Listener   net.Listener
 	Input      dnstap.Input
@@ -96,9 +97,12 @@ func (c *config) Validate() (err error) {
 	}
 
 	for _, val := range patterns {
-		if d := strings.TrimSpace(val); d != "" {
-			c.IgnoreDomains = append(c.IgnoreDomains, strings.TrimSpace(d))
+		m, err := ParseMatcher(val)
+		if err != nil {
+			log.Printf("[WARN] failed to parse ignore rule. Skip invalid rule. Rule: %s, ERR: %+v\n", val, err)
+			continue
 		}
+		c.IgnoreDomains = append(c.IgnoreDomains, m)
 	}
 
 	if c.HttpPort != 0 {
